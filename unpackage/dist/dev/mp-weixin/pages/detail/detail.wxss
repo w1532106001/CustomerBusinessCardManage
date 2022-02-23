@@ -1,0 +1,14 @@
+
+.container {
+	padding-left: 20rpx;
+	padding-right: 20rpx;
+	line-height: 40rpx;
+	color: #101010;
+	font-size: 28rpx;
+	height: 100vh;
+	background-color: #FFFFFF;
+	display: flex;
+	flex-direction: column;
+	overflow: hideen
+}
+
