@@ -5,33 +5,33 @@
 			<u-row>
 
 				<view style="margin-left: 30rpx;">
-					<u--image :showLoading="true" :src="image[0].url" width="160rpx" height="200rpx">
+					<u--image :showLoading="true" :src="'http://4xg4c2.natappfree.cc'+detail.picUrl" width="160rpx" height="200rpx">
 					</u--image>
 				</view>
 				<view style="margin-left:40rpx;">
 					<view>
 						<u-row>
-							姓名: {{name}}
+							姓名: {{detail.name}}
 						</u-row>
 						<u-row customStyle="margin-top:34rpx;">
-							职位: {{position}}
+							职位: {{detail.employeeName}}
 						</u-row>
 						<u-row customStyle="margin-top:16rpx;">
-							公司: {{companyName}}
+							公司: {{detail.companyName}}
 						</u-row>
 						<u-row customStyle="margin-top:16rpx;">
-							电话: {{mobile}}
+							电话: {{detail.phone}}
 						</u-row>
 					</view>
 				</view>
 			</u-row>
 			<view style="margin-top: 100rpx;">
 				<view style="padding-bottom: 20rpx;">VR地址</view>
-				<u--text mode="link" :text="VRAddress" :href="VRAddress"></u--text>
+				<u--text mode="link" :text="detail.vrUrl" :href="detail.vrUrl"></u--text>
 			</view>
 			<view style="margin-top: 100rpx;">
 				<view style="padding-bottom: 30rpx;">企业介绍:</view>
-				{{enterpriseIntroduction}}
+				{{detail.companyIntroduction}}
 			</view>
 		</view>
 		<view style="margin-bottom: 20rpx;" v-show="isAdmin">
@@ -44,28 +44,18 @@
 	export default {
 		data() {
 			return {
-				image: [{
-							name: "file.jpg",
-							extname: "jpg",
-							url: "https://cdn.uviewui.com/uview/album/1.jpg",
-						}],
-				name: "小米",
-				position: "总经理",
-				mobile: "13655511111",
-				address: "上海市",
-				companyName: "人寿保险",
-				enterpriseIntroduction: '阿斯顿撒旦阿斯顿撒旦撒旦阿萨大实打实飞洒大夫撒发阿斯顿撒旦阿斯顿撒旦撒旦阿萨大实打实飞洒大夫撒发阿斯顿撒旦阿斯顿撒旦撒旦阿萨大实打实飞洒大夫撒发阿斯顿撒旦阿斯顿撒旦撒旦阿萨大实打实飞洒大夫撒发阿斯顿撒旦阿斯顿撒旦撒旦阿萨大实打实飞洒大夫撒发',
-				VRAddress: "http://www.baidu.com",
-				isAdmin: true
+				isAdmin: true,
+				detail:{}
 			}
+		},
+		onLoad(option) {
+			this.detail = JSON.parse(decodeURIComponent(option.item)) 
+			
 		},
 		methods: {
 			jumpInputPage() {
 				uni.redirectTo({
-					url: "/pages/input/input" + "?image=" + encodeURIComponent(JSON.stringify(this.image)) + "&name=" + this.name +
-						"&position=" + this.position + "&mobile=" + this.mobile + "&address=" + this.address +
-						"&companyName=" + this.companyName +
-						"&enterpriseIntroduction=" + this.enterpriseIntroduction + "&VRAddress=" + this.VRAddress
+					url: "/pages/input/input?detail="+encodeURIComponent(JSON.stringify(this.detail))
 				})
 			}
 		}

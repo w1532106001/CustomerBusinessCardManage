@@ -3,34 +3,38 @@
 	<view class="container">
 		<view style="150rpx;margin-top: 32rpx;margin-bottom: 30rpx;">学员信息录入</view>
 		<scroll-view style="flex: 1;overflow: hidden;" scroll-y @scrolltoupper="upper" @scrolltolower="lower"
-			@scroll="scroll">
+			@scroll="scroll" :scroll-top="scrollTop">
 			<view style="display: flex;align-items: center;">
 				<view>姓名:</view>
-				<input v-model="name" class="input-border" />
+				<input v-model="detail.name" class="input-border" />
 			</view>
 			<view class="item">
 				<view>职位:</view>
-				<input v-model="position" class="input-border" />
+				<input v-model="detail.employeeName" class="input-border" />
 			</view>
 			<view class="item">
 				<view>电话:</view>
-				<input v-model="mobile" class="input-border" />
+				<input v-model="detail.phone" class="input-border" />
 			</view>
 			<view class="item">
 				<view>地址:</view>
-				<input v-model="address" class="input-border" />
+				<input v-model="detail.address" class="input-border" />
+			</view>
+			<view class="item">
+				<view>班级:</view>
+				<input v-model="detail.cclass" class="input-border" />
 			</view>
 			<view class="item">
 				<view>企业名:</view>
-				<input v-model="companyName" class="input-border" />
+				<input v-model="detail.companyName" class="input-border" />
 			</view>
 			<view class="item" style="margin-top: 30rpx;">
 				<view>企业介绍:</view>
-				<textarea v-model="enterpriseIntroduction" class="textarea-border" />
+				<textarea v-model="detail.companyIntroduction" class="textarea-border" />
 			</view>
 			<view style="margin-top: 68rpx; display: flex; flex-direction: row; ">
 				<view>照片</view>
-				<uni-file-picker :auto-upload="false" style="margin-left: 80rpx;width: 400rpx;height: 306rpx; "
+				<uni-file-picker ref="files" :auto-upload="false" style="margin-left: 80rpx;width: 400rpx;height: 306rpx; "
 					v-model="imageValue" fileMediatype="image" :image-styles="imageStyles" mode="grid" :limit="1"
 					@select="select" @progress="progress" @success="success" @fail="fail">
 				</uni-file-picker>
@@ -38,7 +42,7 @@
 			</view>
 			<view class="item">
 				<view>VR地址:</view>
-				<input v-model="VRAddress" class="input-border" />
+				<input v-model="detail.vrUrl" class="input-border" />
 			</view>
 
 		</scroll-view>
@@ -52,13 +56,18 @@
 	export default {
 		data() {
 			return {
-				name: "",
-				position: "",
-				mobile: "",
-				address: "",
-				companyName: "",
-				enterpriseIntroduction: "",
-				VRAddress: "",
+				scrollTop: 0,
+				            old: {
+				                scrollTop: 0
+				            },
+				// name: "",
+				// position: "",
+				// mobile: "",
+				// address: "",
+				// companyName: "",
+				// enterpriseIntroduction: "",
+				// VRAddress: "",
+				// cclass: "",
 				imageValue: [],
 				imageStyles: {
 					width: "400rpx",
@@ -69,24 +78,42 @@
 						radius: "0rpx",
 					}
 				},
-
+				selectImagePath:'',
+				imageData:"",
+				//1new 2update
+				type:1,
+				detail:{}
 			}
 		},
 		onLoad(option) {
-			this.name = option.name;
-			this.position = option.position;
-			this.mobile = option.mobile;
-			this.address = option.address;
-			this.companyName = option.companyName;
-			this.enterpriseIntroduction = option.enterpriseIntroduction;
-			this.VRAddress = option.VRAddress;
-			this.imageValue = JSON.parse(decodeURIComponent(option.image)) 
-			console.log("参数：" + option.toString())
+			if(option.detail){
+				let detail = JSON.parse(decodeURIComponent(option.detail))
+				this.type = 2;
+				// this.name = detail.name;
+				// this.position = detail.employeeName;
+				// this.mobile = detail.phone;
+				// this.address = detail.address;
+				// this.companyName = detail.companyName;
+				// this.enterpriseIntroduction = detail.companyIntroduction;
+				// this.VRAddress = detail.vrUrl;
+				this.detail = detail;
+				this.imageValue = [{
+							name: "file."+detail.extname,
+							extname: detail.extname,
+							url: 'http://4xg4c2.natappfree.cc'+detail.picUrl,
+						}],
+				console.log("参数：" + detail.extname)
+			}else{
+				this.type = 1;
+			}
+			
 		},
 		methods: {
 			// 获取上传状态
 			select(e) {
+				this.selectImagePath = e.tempFilePaths[0];
 				console.log('选择文件：', e)
+				console.log('选择文件路径：', this.selectImagePath)
 			},
 			// 获取上传进度
 			progress(e) {
@@ -113,10 +140,162 @@
 				this.old.scrollTop = e.detail.scrollTop
 			},
 			submit() {
+				if(this.isEmpty(this.detail.name)){
+					this.showEmptyToast("姓名")
+					return
+				}
+				if(this.isEmpty(this.detail.employeeName)){
+					this.showEmptyToast("职位")
+					return
+				}
+				if(this.isEmpty(this.detail.phone)){
+					this.showEmptyToast("电话")
+					return
+				}
+				if(this.isEmpty(this.detail.address)){
+					this.showEmptyToast("地址")
+					return
+				}
+				if(this.isEmpty(this.detail.companyName)){
+					this.showEmptyToast("企业名")
+					return
+				}
+				if(this.isEmpty(this.detail.companyIntroduction)){
+					this.showEmptyToast("企业介绍")
+					return
+				}
+				if(this.isEmpty(this.detail.vrUrl)){
+					this.showEmptyToast("VR地址")
+					return
+				}
+				if(this.selectImagePath){
+				this.uploadFile();	
+				}else{
+					uni.showLoading({
+						mask:true
+					});
+					if(this.type==1){
+						
+							this.newInfo();
+						}else{
+							this.updateInfo();
+						}
+				}
+				
+				
 				console.log("name:" + this.name + "position:" + this.position + "mobile:" + this.mobile + "address:" + this
-					.address)
+					.address);
 			},
+			uploadFile(){
+				// uni.compressImage()
+				
+				console.log("图片数据"+this.selectImagePath)
+				uni.showLoading({
+					mask:true
+				});
+				uni.uploadFile({
+					url:"http://4xg4c2.natappfree.cc/avatar",
+					filePath:this.selectImagePath,
+					name:"file",
+					// header:{"":""},
+					success:(res) =>{
+						console.log(res)
+						if(res.statusCode==200){
+							let picUrl = JSON.parse(res.data).data;
+							this.detail.picUrl = picUrl;
+							console.log("图片上传成功url:"+picUrl)
+							if(this.type==1){
+							this.newInfo()	
+							}else{
+								this.updateInfo()
+							}
+						}else{
+						uni.hideLoading();
+							uni.showToast({
+								title:res.errMsg,
+								duration:2000
+							})
+						}
+					},
+					fail(e){
+						console.log(e);
+					uni.hideLoading();
+						uni.showToast({
+							title:"图片上传失败",
+							duration:2000
+						})
+					}
+					
+				});
+			},updateInfo(){
+				uni.request({
+						method:"PUT",
+					    url: 'http://4xg4c2.natappfree.cc/info/'+this.detail.id, //仅为示例，并非真实接口地址。
+					    data: this.detail,
+					  
+					    success: (res) => {
+					       console.log(res)
+					     uni.hideLoading();
+						   if(res.statusCode==200){
+					       	console.log("提交成功")
+					       }else{
+					       	uni.showToast({
+					       		title:res.errMsg,
+					       		duration:2000
+					       	})
+					       }
+					    },
+						fail:(e)=>{
+							console.log(e)
+							uni.hideLoading();
+								uni.showToast({
+									title:"提交失败",
+									duration:2000
+								})
+						}
+					});
+				
+			},
+			newInfo(picUrl){
+				uni.request({
+					method:"POST",
+				    url: 'http://4xg4c2.natappfree.cc/info', //仅为示例，并非真实接口地址。
+				    data: this.detail,
+				    success: (res) => {
+				       console.log(res)
+				     uni.hideLoading();
+					   if(res.statusCode==200){
+				       	console.log("提交成功")
+				       }else{
+				       	uni.showToast({
+				       		title:res.errMsg,
+				       		duration:2000
+				       	})
+				       }
+				    },
+					fail:(e)=>{
+						console.log(e)
+						uni.hideLoading();
+							uni.showToast({
+								title:"提交失败",
+								duration:2000
+							})
+					}
+				});
+			},
+			showEmptyToast(s){
+				uni.showToast({
+					title:s+"不能为空",
+					icon:"error",
+					duration:2000
+				})
+			},
+			isEmpty(str) {
+			    return (!str || 0 === str.length);
+			
+			}
 		}
+		
 	}
 </script>
 

@@ -18,13 +18,12 @@
 			@scrolltolower="lower" @scroll="scroll" :refresher-triggered="triggered" :lower-threshold="100"
 			@refresherrefresh="onRefresh">
 			<view v-for="(item, index) in dataList" :key="index">
-				<u-row
-				@click="clickItem"
+				<u-row @click="clickItem(item)"
 					customStyle="border: 2rpx;border-style: solid;border-color: #CECECE;border-radius: 52rpx;padding: 30rpx;margin-bottom: 30rpx;color: #000000;"
 					class="item">
 
 					<view>
-						<u--image :showLoading="true" :src="item.image" width="160rpx" height="200rpx">
+						<u--image :showLoading="true" :src="'http://4xg4c2.natappfree.cc'+item.picUrl" width="160rpx" height="200rpx">
 						</u--image>
 					</view>
 					<view style="margin-left:40rpx;">
@@ -33,13 +32,13 @@
 								姓名: {{item.name}}
 							</u-row>
 							<u-row customStyle="margin-top:34rpx;">
-								职位: {{item.position}}
+								职位: {{item.employeeName}}
 							</u-row>
 							<u-row customStyle="margin-top:16rpx;">
-								公司: {{item.company}}
+								公司: {{item.companyName}}
 							</u-row>
 							<u-row customStyle="margin-top:16rpx;">
-								电话: {{item.mobile}}
+								电话: {{item.phone}}
 							</u-row>
 						</view>
 					</view>
@@ -61,7 +60,6 @@
 	export default {
 		data() {
 			return {
-				src: 'https://cdn.uviewui.com/uview/album/1.jpg',
 				scrollTop: 0,
 				old: {
 					scrollTop: 0
@@ -73,8 +71,9 @@
 					['中国', '美国', '日本'],
 				],
 				showText: "中国",
-				pages: 1,
-				_freshing: false
+				pages: 0,
+				_freshing: false,
+				total:0
 
 			}
 		},
@@ -94,18 +93,13 @@
 				this.old.scrollTop = e.detail.scrollTop
 			},
 			loadmore() {
-				console.log("加载数据")
-				this.pages++;
-				for (let i = 0; i < 30; i++) {
-					this.dataList.push({
-						image: "https://cdn.uviewui.com/uview/album/1.jpg",
-						name: '测试' + i,
-						position: '测试职位' + i,
-						company: "测试企业" + i,
-						mobile: "12345678901"
-					})
+				if(this.pages>=this.total){
+					return
+				}else{
+					this.pages++;
+					this.fetchList(false);
 				}
-				console.log("加载数据成功")
+				
 			},
 			onRefresherpulling() {
 				console.log("下拉")
@@ -116,21 +110,8 @@
 				console.log("刷新")
 				this._freshing = true;
 				this.triggered = true;
-				setTimeout(() => {
-					this.triggered = false;
-					this._freshing = false;
-					for (let i = 0; i < 30; i++) {
-						var t = (this.pages-1)*30+i;
-						this.dataList.push({
-							image: "https://cdn.uviewui.com/uview/album/1.jpg",
-							name: '测试' + t,
-							position: '测试职位' + t,
-							company: "测试企业" + t,
-							mobile: "12345678901"
-						})
-					}
-					console.log("刷新数据成功")
-				}, 1000)
+				this.pages = 0;
+				this.fetchList(true);
 			},
 			onPickerCancel() {
 				this.show = false;
@@ -147,10 +128,72 @@
 					url: "/pages/input/input"
 				})
 			},
-			clickItem(){
+			clickItem(item) {
+				console.log("item:"+encodeURIComponent(JSON.stringify(item)))
 				uni.navigateTo({
-					url:"/pages/detail/detail"
+					url: "/pages/detail/detail?item="+encodeURIComponent(JSON.stringify(item))
 				})
+			},
+			fetchList(r){
+				uni.request({
+					method: "GET",
+					url: 'http://4xg4c2.natappfree.cc/infos?pos=' + this.pages + '&limit=10', //仅为示例，并非真实接口地址。
+					success: (res) => {
+						if(r){
+						this.triggered = false;
+						this._freshing = false;	
+						}
+						if (res.statusCode == 200) {
+							let data = res.data.data;
+							this.total = res.data.total;
+							console.log("page "+this.pages+"total:"+this.total)
+							if(data){
+								if(r){
+								this.dataList = [];
+								}
+								for (var i=0; i<data.length; i++)
+								{
+									var e = data[i];
+								 this.dataList.push(e)
+								}
+							}
+						} else {
+							if(r){
+							uni.showToast({
+								icon: "error",
+								title: "刷新失败",
+								duration: 2000
+							});	
+							}else{
+								uni.showToast({
+									icon: "error",
+									title: "加载失败",
+									duration: 2000
+								})
+							}
+							
+						}
+					},
+					fail: (e) => {
+						console.log(e)
+						if(r){
+							this.triggered = false;
+							this._freshing = false;
+							uni.showToast({
+								icon: "error",
+								title: "刷新失败",
+								duration: 2000
+							})
+						}else{
+							uni.showToast({
+								icon: "error",
+								title: "加载失败",
+								duration: 2000
+							})
+						}
+					}
+				});
+				
 			}
 		}
 	}
