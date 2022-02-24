@@ -22,7 +22,7 @@
 			</view>
 			<view class="item">
 				<view>班级:</view>
-				<input v-model="detail.cclass" class="input-border" />
+				<input v-model="detail.className" class="input-border" />
 			</view>
 			<view class="item">
 				<view>企业名:</view>
@@ -34,9 +34,10 @@
 			</view>
 			<view style="margin-top: 68rpx; display: flex; flex-direction: row; ">
 				<view>照片</view>
-				<uni-file-picker ref="files" :auto-upload="false" style="margin-left: 80rpx;width: 400rpx;height: 306rpx; "
-					v-model="imageValue" fileMediatype="image" :image-styles="imageStyles" mode="grid" :limit="1"
-					@select="select" @progress="progress" @success="success" @fail="fail">
+				<uni-file-picker ref="files" :auto-upload="false"
+					style="margin-left: 80rpx;width: 400rpx;height: 306rpx; " v-model="imageValue" fileMediatype="image"
+					:image-styles="imageStyles" mode="grid" :limit="1" @select="select" @progress="progress"
+					@success="success" @fail="fail">
 				</uni-file-picker>
 
 			</view>
@@ -57,17 +58,10 @@
 		data() {
 			return {
 				scrollTop: 0,
-				            old: {
-				                scrollTop: 0
-				            },
-				// name: "",
-				// position: "",
-				// mobile: "",
-				// address: "",
-				// companyName: "",
-				// enterpriseIntroduction: "",
-				// VRAddress: "",
-				// cclass: "",
+				old: {
+					scrollTop: 0
+				},
+
 				imageValue: [],
 				imageStyles: {
 					width: "400rpx",
@@ -78,35 +72,28 @@
 						radius: "0rpx",
 					}
 				},
-				selectImagePath:'',
-				imageData:"",
+				selectImagePath: '',
+				imageData: "",
 				//1new 2update
-				type:1,
-				detail:{}
+				type: 1,
+				detail: {}
 			}
 		},
 		onLoad(option) {
-			if(option.detail){
+			if (option.detail) {
 				let detail = JSON.parse(decodeURIComponent(option.detail))
 				this.type = 2;
-				// this.name = detail.name;
-				// this.position = detail.employeeName;
-				// this.mobile = detail.phone;
-				// this.address = detail.address;
-				// this.companyName = detail.companyName;
-				// this.enterpriseIntroduction = detail.companyIntroduction;
-				// this.VRAddress = detail.vrUrl;
 				this.detail = detail;
 				this.imageValue = [{
-							name: "file."+detail.extname,
-							extname: detail.extname,
-							url: 'http://4xg4c2.natappfree.cc'+detail.picUrl,
-						}],
-				console.log("参数：" + detail.extname)
-			}else{
+						name: "file." + detail.extname,
+						extname: detail.extname,
+						url: getApp().globalData.baseUrl + detail.picUrl,
+					}],
+					console.log("参数：" + detail.extname)
+			} else {
 				this.type = 1;
 			}
-			
+
 		},
 		methods: {
 			// 获取上传状态
@@ -140,162 +127,192 @@
 				this.old.scrollTop = e.detail.scrollTop
 			},
 			submit() {
-				if(this.isEmpty(this.detail.name)){
+				if (this.isEmpty(this.detail.name)) {
 					this.showEmptyToast("姓名")
 					return
 				}
-				if(this.isEmpty(this.detail.employeeName)){
+				if (this.isEmpty(this.detail.employeeName)) {
 					this.showEmptyToast("职位")
 					return
 				}
-				if(this.isEmpty(this.detail.phone)){
+				if (this.isEmpty(this.detail.phone)) {
 					this.showEmptyToast("电话")
 					return
 				}
-				if(this.isEmpty(this.detail.address)){
+				if (this.isEmpty(this.detail.address)) {
 					this.showEmptyToast("地址")
 					return
 				}
-				if(this.isEmpty(this.detail.companyName)){
+				if (this.isEmpty(this.detail.className)) {
+					this.showEmptyToast("班级")
+					return
+				}
+				if (this.isEmpty(this.detail.companyName)) {
 					this.showEmptyToast("企业名")
 					return
 				}
-				if(this.isEmpty(this.detail.companyIntroduction)){
+				if (this.isEmpty(this.detail.companyIntroduction)) {
 					this.showEmptyToast("企业介绍")
 					return
 				}
-				if(this.isEmpty(this.detail.vrUrl)){
+				if (this.isEmpty(this.detail.vrUrl)) {
 					this.showEmptyToast("VR地址")
 					return
 				}
-				if(this.selectImagePath){
-				this.uploadFile();	
-				}else{
+				if (this.selectImagePath) {
+					this.uploadFile();
+				} else {
 					uni.showLoading({
-						mask:true
+						mask: true
 					});
-					if(this.type==1){
-						
-							this.newInfo();
-						}else{
-							this.updateInfo();
-						}
+					if (this.type == 1) {
+						this.newInfo();
+					} else {
+						this.updateInfo();
+					}
 				}
-				
-				
-				console.log("name:" + this.name + "position:" + this.position + "mobile:" + this.mobile + "address:" + this
-					.address);
 			},
-			uploadFile(){
-				// uni.compressImage()
-				
-				console.log("图片数据"+this.selectImagePath)
+			uploadFile() {
+				console.log("图片数据" + this.selectImagePath)
 				uni.showLoading({
-					mask:true
+					mask: true
 				});
-				uni.uploadFile({
-					url:"http://4xg4c2.natappfree.cc/avatar",
-					filePath:this.selectImagePath,
-					name:"file",
-					// header:{"":""},
-					success:(res) =>{
-						console.log(res)
-						if(res.statusCode==200){
-							let picUrl = JSON.parse(res.data).data;
-							this.detail.picUrl = picUrl;
-							console.log("图片上传成功url:"+picUrl)
-							if(this.type==1){
-							this.newInfo()	
-							}else{
-								this.updateInfo()
+				uni.compressImage({
+					src: this.selectImagePath,
+					quality: 80,
+					success: res => {
+						console.log(res.tempFilePath)
+						uni.uploadFile({
+							url: getApp().globalData.baseUrl + "/avatar",
+							filePath: res.tempFilePath,
+							name: "file",
+							success: (res) => {
+								console.log(res)
+								if (res.statusCode == 200) {
+									let picUrl = JSON.parse(res.data).data;
+									this.detail.picUrl = picUrl;
+									console.log("图片上传成功url:" + picUrl)
+									if (this.type == 1) {
+										this.newInfo()
+									} else {
+										this.updateInfo()
+									}
+								} else {
+									uni.hideLoading();
+									uni.showToast({
+										title: res.errMsg,
+										duration: 2000
+									})
+								}
+							},
+							fail(e) {
+								console.log(e);
+								uni.hideLoading();
+								uni.showToast({
+									icon: "error",
+									title: "图片上传失败",
+									duration: 2000
+								})
 							}
-						}else{
+
+						});
+
+					},
+					fail(e) {
+						console.log('图片压缩失败e:'+e)
 						uni.hideLoading();
+						uni.showToast({
+							duration:2000,
+							title:"图片压缩失败",
+							icon:"error"
+						})
+					}
+				})
+
+			},
+			updateInfo() {
+				uni.request({
+					method: "PUT",
+					url: getApp().globalData.baseUrl + '/info/' + this.detail.id, //仅为示例，并非真实接口地址。
+					data: this.detail,
+
+					success: (res) => {
+						console.log(res)
+						uni.hideLoading();
+						if (res.statusCode == 200) {
+							console.log("提交成功")
 							uni.showToast({
-								title:res.errMsg,
-								duration:2000
+								icon: "success",
+								title: "提交成功",
+								duration: 2000
+							})
+							uni.navigateBack();
+						} else {
+							uni.showToast({
+								title: res.errMsg,
+								duration: 2000
 							})
 						}
 					},
-					fail(e){
-						console.log(e);
-					uni.hideLoading();
-						uni.showToast({
-							title:"图片上传失败",
-							duration:2000
-						})
-					}
-					
-				});
-			},updateInfo(){
-				uni.request({
-						method:"PUT",
-					    url: 'http://4xg4c2.natappfree.cc/info/'+this.detail.id, //仅为示例，并非真实接口地址。
-					    data: this.detail,
-					  
-					    success: (res) => {
-					       console.log(res)
-					     uni.hideLoading();
-						   if(res.statusCode==200){
-					       	console.log("提交成功")
-					       }else{
-					       	uni.showToast({
-					       		title:res.errMsg,
-					       		duration:2000
-					       	})
-					       }
-					    },
-						fail:(e)=>{
-							console.log(e)
-							uni.hideLoading();
-								uni.showToast({
-									title:"提交失败",
-									duration:2000
-								})
-						}
-					});
-				
-			},
-			newInfo(picUrl){
-				uni.request({
-					method:"POST",
-				    url: 'http://4xg4c2.natappfree.cc/info', //仅为示例，并非真实接口地址。
-				    data: this.detail,
-				    success: (res) => {
-				       console.log(res)
-				     uni.hideLoading();
-					   if(res.statusCode==200){
-				       	console.log("提交成功")
-				       }else{
-				       	uni.showToast({
-				       		title:res.errMsg,
-				       		duration:2000
-				       	})
-				       }
-				    },
-					fail:(e)=>{
+					fail: (e) => {
 						console.log(e)
 						uni.hideLoading();
+						uni.showToast({
+							icon: "error",
+							title: "提交失败",
+							duration: 2000
+						})
+					}
+				});
+
+			},
+			newInfo(picUrl) {
+				uni.request({
+					method: "POST",
+					url: getApp().globalData.baseUrl + '/info', //仅为示例，并非真实接口地址。
+					data: this.detail,
+					success: (res) => {
+						console.log(res)
+						uni.hideLoading();
+						if (res.statusCode == 200) {
 							uni.showToast({
-								title:"提交失败",
-								duration:2000
+								icon: "success",
+								title: "提交成功",
+								duration: 2000
 							})
+							console.log("提交成功")
+							uni.navigateBack();
+						} else {
+							uni.showToast({
+								title: res.errMsg,
+								duration: 2000
+							})
+						}
+					},
+					fail: (e) => {
+						console.log(e)
+						uni.hideLoading();
+						uni.showToast({
+							icon: "error",
+							title: "提交失败",
+							duration: 2000
+						})
 					}
 				});
 			},
-			showEmptyToast(s){
+			showEmptyToast(s) {
 				uni.showToast({
-					title:s+"不能为空",
-					icon:"error",
-					duration:2000
+					title: s + "不能为空",
+					icon: "error",
+					duration: 2000
 				})
 			},
 			isEmpty(str) {
-			    return (!str || 0 === str.length);
-			
+				return (!str || 0 === str.length);
+
 			}
 		}
-		
+
 	}
 </script>
 

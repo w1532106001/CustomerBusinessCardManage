@@ -5,7 +5,7 @@
 			<u-row>
 
 				<view style="margin-left: 30rpx;">
-					<u--image :showLoading="true" :src="'http://4xg4c2.natappfree.cc'+detail.picUrl" width="160rpx" height="200rpx">
+					<u--image :showLoading="true" :src="baseUrl+detail.picUrl" width="160rpx" height="200rpx">
 					</u--image>
 				</view>
 				<view style="margin-left:40rpx;">
@@ -21,6 +21,9 @@
 						</u-row>
 						<u-row customStyle="margin-top:16rpx;">
 							电话: {{detail.phone}}
+						</u-row>
+						<u-row customStyle="margin-top:16rpx;">
+							班级: {{detail.className}}
 						</u-row>
 					</view>
 				</view>
@@ -45,10 +48,13 @@
 		data() {
 			return {
 				isAdmin: true,
-				detail:{}
+				detail:{},
+				baseUrl:""
 			}
 		},
 		onLoad(option) {
+			this.baseUrl = getApp().globalData.baseUrl;
+			
 			this.detail = JSON.parse(decodeURIComponent(option.item)) 
 			
 		},

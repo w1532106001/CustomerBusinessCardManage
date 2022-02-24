@@ -23,7 +23,8 @@
 					class="item">
 
 					<view>
-						<u--image :showLoading="true" :src="'http://4xg4c2.natappfree.cc'+item.picUrl" width="160rpx" height="200rpx">
+						<u--image :showLoading="true" :src="baseUrl+item.picUrl" width="160rpx"
+							height="200rpx">
 						</u--image>
 					</view>
 					<view style="margin-left:40rpx;">
@@ -70,14 +71,16 @@
 				columns: [
 					['中国', '美国', '日本'],
 				],
-				showText: "中国",
+				showText: "",
 				pages: 0,
 				_freshing: false,
-				total:0
+				total: 0,
+				baseUrl:""
 
 			}
 		},
 		onLoad() {
+			this.baseUrl = getApp().globalData.baseUrl;
 			this.onRefresh();
 		},
 		methods: {
@@ -93,13 +96,13 @@
 				this.old.scrollTop = e.detail.scrollTop
 			},
 			loadmore() {
-				if(this.pages>=this.total){
+				if (this.pages >= this.total) {
 					return
-				}else{
+				} else {
 					this.pages++;
 					this.fetchList(false);
 				}
-				
+
 			},
 			onRefresherpulling() {
 				console.log("下拉")
@@ -129,54 +132,53 @@
 				})
 			},
 			clickItem(item) {
-				console.log("item:"+encodeURIComponent(JSON.stringify(item)))
+				console.log("item:" + encodeURIComponent(JSON.stringify(item)))
 				uni.navigateTo({
-					url: "/pages/detail/detail?item="+encodeURIComponent(JSON.stringify(item))
+					url: "/pages/detail/detail?item=" + encodeURIComponent(JSON.stringify(item))
 				})
 			},
-			fetchList(r){
+			fetchList(r) {
 				uni.request({
 					method: "GET",
-					url: 'http://4xg4c2.natappfree.cc/infos?pos=' + this.pages + '&limit=10', //仅为示例，并非真实接口地址。
+					url: getApp().globalData.baseUrl+'/infos?pos=' + this.pages + '&limit=10', //仅为示例，并非真实接口地址。
 					success: (res) => {
-						if(r){
-						this.triggered = false;
-						this._freshing = false;	
+						if (r) {
+							this.triggered = false;
+							this._freshing = false;
 						}
 						if (res.statusCode == 200) {
 							let data = res.data.data;
 							this.total = res.data.total;
-							console.log("page "+this.pages+"total:"+this.total)
-							if(data){
-								if(r){
-								this.dataList = [];
+							console.log("page " + this.pages + "total:" + this.total)
+							if (data) {
+								if (r) {
+									this.dataList = [];
 								}
-								for (var i=0; i<data.length; i++)
-								{
+								for (var i = 0; i < data.length; i++) {
 									var e = data[i];
-								 this.dataList.push(e)
+									this.dataList.push(e)
 								}
 							}
 						} else {
-							if(r){
-							uni.showToast({
-								icon: "error",
-								title: "刷新失败",
-								duration: 2000
-							});	
-							}else{
+							if (r) {
+								uni.showToast({
+									icon: "error",
+									title: "刷新失败",
+									duration: 2000
+								});
+							} else {
 								uni.showToast({
 									icon: "error",
 									title: "加载失败",
 									duration: 2000
 								})
 							}
-							
+
 						}
 					},
 					fail: (e) => {
 						console.log(e)
-						if(r){
+						if (r) {
 							this.triggered = false;
 							this._freshing = false;
 							uni.showToast({
@@ -184,7 +186,7 @@
 								title: "刷新失败",
 								duration: 2000
 							})
-						}else{
+						} else {
 							uni.showToast({
 								icon: "error",
 								title: "加载失败",
@@ -193,8 +195,11 @@
 						}
 					}
 				});
-				
+
 			}
+		,fetchClassList(){
+			
+		}
 		}
 	}
 </script>
