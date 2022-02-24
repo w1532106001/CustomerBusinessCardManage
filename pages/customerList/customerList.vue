@@ -4,11 +4,12 @@
 			<view style="display: inline-block;">学员通讯录</view>
 			<view style="width: 240rpx;height: 60rpx;float: right;display: inline;margin-right: 20rpx;"
 				@click="show = true">
-				<view style="display: inline-block;">{{showText}}</view>
+				<view style="display: inline-block;">{{selectClass.name}}</view>
 				<view style="float: right">
 					<u-icon name="arrow-down"></u-icon>
 				</view>
-				<u-picker :show="show" :columns="columns" @confirm="onPickerConfirm" @cancel="onPickerCancel">
+				<u-picker :show="show" :columns="classList" keyName="name" @confirm="onPickerConfirm"
+					@cancel="onPickerCancel">
 				</u-picker>
 			</view>
 
@@ -23,8 +24,7 @@
 					class="item">
 
 					<view>
-						<u--image :showLoading="true" :src="baseUrl+item.picUrl" width="160rpx"
-							height="200rpx">
+						<u--image :showLoading="true" :src="baseUrl+item.picUrl" width="160rpx" height="200rpx">
 						</u--image>
 					</view>
 					<view style="margin-left:40rpx;">
@@ -68,20 +68,23 @@
 				dataList: [],
 				triggered: false,
 				show: false,
-				columns: [
-					['中国', '美国', '日本'],
-				],
-				showText: "",
+				
+				classList: [],
+			
 				pages: 0,
 				_freshing: false,
 				total: 0,
-				baseUrl:""
-
+				baseUrl: "",
+				selectClass: {},
+				userInfo:{}
 			}
 		},
 		onLoad() {
 			this.baseUrl = getApp().globalData.baseUrl;
-			this.onRefresh();
+			this.getUserInfo();
+		},
+		onShow() {
+			this.fetchClassList();
 		},
 		methods: {
 			upper: function(e) {
@@ -120,13 +123,21 @@
 				this.show = false;
 
 			},
-			onPickerConfirm(arr) {
+			onPickerConfirm(item) {
 				this.show = false;
-				console.log(arr.value[0]);
-				this.showText = arr.value[0];
+				this.selectClass = item.values[0][item.indexs[0]];
+				this.onRefresh();
 			},
 			jumpInputPage() {
 				console.log("跳转页面")
+				if(!this.userInfo.admin){
+					uni.showToast({
+						duration:2000,
+						icon:"error",
+						title:"管理员才可新增"
+					})
+					return
+				}
 				uni.navigateTo({
 					url: "/pages/input/input"
 				})
@@ -140,7 +151,8 @@
 			fetchList(r) {
 				uni.request({
 					method: "GET",
-					url: getApp().globalData.baseUrl+'/infos?pos=' + this.pages + '&limit=10', //仅为示例，并非真实接口地址。
+					url: getApp().globalData.baseUrl + '/infos?pos=' + this.pages + '&limit=10&classId=' + this
+						.selectClass.id,
 					success: (res) => {
 						if (r) {
 							this.triggered = false;
@@ -196,11 +208,99 @@
 					}
 				});
 
-			}
-		,fetchClassList(){
-			
-		}
-		}
+			},
+			fetchClassList() {
+				uni.request({
+					method: "GET",
+					url: getApp().globalData.baseUrl + '/class',
+					success: (res) => {
+						if (res.statusCode == 200) {
+							this.classList = [];
+							this.classList.push(res.data.data);
+							this.selectClass = this.classList[0][0];
+							this.onRefresh();
+						} else {
+							uni.showToast({
+								icon: "error",
+								title: "班级列表获取失败",
+								duration: 2000
+							});
+
+						}
+					},
+					fail: (e) => {
+						console.log(e)
+						uni.showToast({
+							icon: "error",
+							title: "班级列表获取失败",
+							duration: 2000
+						})
+					}
+				});
+			},
+			getUserInfo() {
+				//登录
+				uni.login({
+							provider: 'weixin',
+							success: res => {
+								// console.log('登录成功：', res);
+								//获取临时登录凭证code
+								var code = res.code;
+								uni.request({
+									method: "POST",
+									url: getApp().globalData.baseUrl + '/wxLogin',
+									data: {
+										"code":code
+									},
+									success: (res) => {
+									console.log("code:"+code+"resultData:" + JSON.stringify(res));
+										if (res.statusCode == 200) {
+											if(res.data.code==200){
+												
+												let data = res.data.data;
+												this.userInfo = data;
+												uni.setStorage("userInfo", data)
+												this.fetchClassList();
+											}else{
+												uni.showToast({
+													icon: "error",
+													title: "用户信息获取失败",
+													duration: 2000
+												})
+											}
+											
+
+										} else {
+											uni.showToast({
+												icon: "error",
+												title: "用户信息获取失败",
+												duration: 2000
+											})
+
+										}
+									},
+									fail: (e) => {
+										console.log(e)
+										uni.showToast({
+											icon: "error",
+											title: "用户信息获取失败",
+											duration: 2000
+										})
+									}
+								});
+					},
+					fail: err => {
+						console.log('登录失败：', err)
+						uni.showToast({
+							icon: "error",
+							title: "用户信息获取失败",
+							duration: 2000
+						})
+					}
+			})
+	},
+
+	}
 	}
 </script>
 

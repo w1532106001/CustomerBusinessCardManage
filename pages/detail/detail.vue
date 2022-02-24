@@ -37,7 +37,7 @@
 				{{detail.companyIntroduction}}
 			</view>
 		</view>
-		<view style="margin-bottom: 20rpx;" v-show="isAdmin">
+		<view style="margin-bottom: 20rpx;" >
 			<u-button text="编辑" @click="jumpInputPage"></u-button>
 		</view>
 	</view>
@@ -47,21 +47,34 @@
 	export default {
 		data() {
 			return {
-				isAdmin: true,
-				detail:{},
-				baseUrl:""
+				detail: {},
+				baseUrl: "",
+				userInfo:{}
 			}
 		},
 		onLoad(option) {
 			this.baseUrl = getApp().globalData.baseUrl;
-			
-			this.detail = JSON.parse(decodeURIComponent(option.item)) 
-			
+			uni.getStorage({
+				key:"userInfo",
+				success: (value) => {
+					this.userInfo = value;
+				}
+			})
+			this.detail = JSON.parse(decodeURIComponent(option.item))
+
 		},
 		methods: {
 			jumpInputPage() {
+				if(!this.userInfo.admin){
+					uni.showToast({
+						duration:2000,
+						icon:"error",
+						title:"管理员才可编辑"
+					})
+					return
+				}
 				uni.redirectTo({
-					url: "/pages/input/input?detail="+encodeURIComponent(JSON.stringify(this.detail))
+					url: "/pages/input/input?detail=" + encodeURIComponent(JSON.stringify(this.detail))
 				})
 			}
 		}

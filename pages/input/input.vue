@@ -14,7 +14,7 @@
 			</view>
 			<view class="item">
 				<view>电话:</view>
-				<input v-model="detail.phone" class="input-border" />
+				<input v-model="detail.phone" type="number" class="input-border" />
 			</view>
 			<view class="item">
 				<view>地址:</view>
@@ -76,10 +76,18 @@
 				imageData: "",
 				//1new 2update
 				type: 1,
-				detail: {}
+				detail: {},
+				userInfo:{}
 			}
 		},
 		onLoad(option) {
+			
+			uni.getStorage({
+				key:"userInfo",
+				success: (value) => {
+					this.userInfo = value;
+				}
+			})
 			if (option.detail) {
 				let detail = JSON.parse(decodeURIComponent(option.detail))
 				this.type = 2;
@@ -186,6 +194,9 @@
 							url: getApp().globalData.baseUrl + "/avatar",
 							filePath: res.tempFilePath,
 							name: "file",
+							header:{
+								"Authorization":this.userInfo.openId
+							},
 							success: (res) => {
 								console.log(res)
 								if (res.statusCode == 200) {
@@ -219,23 +230,28 @@
 
 					},
 					fail(e) {
-						console.log('图片压缩失败e:'+e)
+						console.log('图片压缩失败e:' + e)
 						uni.hideLoading();
 						uni.showToast({
-							duration:2000,
-							title:"图片压缩失败",
-							icon:"error"
+							duration: 2000,
+							title: "图片压缩失败",
+							icon: "error"
 						})
 					}
 				})
 
 			},
 			updateInfo() {
+				var detail = this.detail;
+				detail.phone = parseInt(detail.phone);
+				console.log("detail" + JSON.stringify(this.detail))
 				uni.request({
 					method: "PUT",
-					url: getApp().globalData.baseUrl + '/info/' + this.detail.id, //仅为示例，并非真实接口地址。
-					data: this.detail,
-
+					url: getApp().globalData.baseUrl + '/info/' + this.detail.id,
+					data: detail,
+					header:{
+						"Authorization":this.userInfo.openId
+					},
 					success: (res) => {
 						console.log(res)
 						uni.hideLoading();
@@ -267,10 +283,16 @@
 
 			},
 			newInfo(picUrl) {
+				var detail = this.detail;
+				detail.phone = parseInt(detail.phone);
+				console.log("detail" + JSON.stringify(this.detail))
 				uni.request({
 					method: "POST",
 					url: getApp().globalData.baseUrl + '/info', //仅为示例，并非真实接口地址。
-					data: this.detail,
+					data: detail,
+					header:{
+						"Authorization":this.userInfo.openId
+					},
 					success: (res) => {
 						console.log(res)
 						uni.hideLoading();
