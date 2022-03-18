@@ -95,20 +95,20 @@ __webpack_require__.r(__webpack_exports__);
 var components
 try {
   components = {
+    uRow: function() {
+      return Promise.all(/*! import() | uni_modules/uview-ui/components/u-row/u-row */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u-row/u-row")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u-row/u-row.vue */ 174))
+    },
     uIcon: function() {
-      return Promise.all(/*! import() | uni_modules/uview-ui/components/u-icon/u-icon */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u-icon/u-icon")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u-icon/u-icon.vue */ 168))
+      return Promise.all(/*! import() | uni_modules/uview-ui/components/u-icon/u-icon */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u-icon/u-icon")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u-icon/u-icon.vue */ 182))
     },
     uPicker: function() {
-      return Promise.all(/*! import() | uni_modules/uview-ui/components/u-picker/u-picker */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u-picker/u-picker")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u-picker/u-picker.vue */ 177))
-    },
-    uRow: function() {
-      return Promise.all(/*! import() | uni_modules/uview-ui/components/u-row/u-row */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u-row/u-row")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u-row/u-row.vue */ 185))
+      return Promise.all(/*! import() | uni_modules/uview-ui/components/u-picker/u-picker */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u-picker/u-picker")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u-picker/u-picker.vue */ 191))
     },
     "u-Image": function() {
-      return Promise.all(/*! import() | uni_modules/uview-ui/components/u--image/u--image */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u--image/u--image")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u--image/u--image.vue */ 193))
+      return Promise.all(/*! import() | uni_modules/uview-ui/components/u--image/u--image */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u--image/u--image")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u--image/u--image.vue */ 199))
     },
     uButton: function() {
-      return Promise.all(/*! import() | uni_modules/uview-ui/components/u-button/u-button */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u-button/u-button")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u-button/u-button.vue */ 199))
+      return Promise.all(/*! import() | uni_modules/uview-ui/components/u-button/u-button */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u-button/u-button")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u-button/u-button.vue */ 205))
     }
   }
 } catch (e) {
@@ -229,6 +229,13 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 var _default =
 {
   data: function data() {
@@ -248,7 +255,9 @@ var _default =
       total: 0,
       baseUrl: "",
       selectClass: {},
-      userInfo: {} };
+      userInfo: {}
+      // bindPhone:false,
+    };
 
   },
   onLoad: function onLoad() {
@@ -256,7 +265,11 @@ var _default =
     this.getUserInfo();
   },
   onShow: function onShow() {
-    this.fetchClassList();
+
+    if (this.userInfo.isBind == true) {
+
+      this.fetchClassList();
+    }
   },
   methods: {
     upper: function upper(e) {
@@ -313,6 +326,19 @@ var _default =
       uni.navigateTo({
         url: "/pages/input/input" });
 
+    }, jumpClassManagementPage: function jumpClassManagementPage() {
+      console.log("跳转页面");
+      if (!this.userInfo.admin) {
+        uni.showToast({
+          duration: 2000,
+          icon: "error",
+          title: "管理员才可管理班级" });
+
+        return;
+      }
+      uni.navigateTo({
+        url: "/pages/classManagement/classManagement" });
+
     },
     clickItem: function clickItem(item) {
       console.log("item:" + encodeURIComponent(JSON.stringify(item)));
@@ -321,10 +347,14 @@ var _default =
 
     },
     fetchList: function fetchList(r) {var _this = this;
+      console.log('fetchList infos openId:' + this.userInfo.openId);
       uni.request({
         method: "GET",
         url: getApp().globalData.baseUrl + '/infos?pos=' + this.pages + '&limit=10&classId=' + this.
         selectClass.id,
+        header: {
+          "Authorization": this.userInfo.openId },
+
         success: function success(res) {
           if (r) {
             _this.triggered = false;
@@ -342,21 +372,33 @@ var _default =
                 var e = data[i];
                 _this.dataList.push(e);
               }
+            } else {
+              _this.dataList = [];
             }
           } else {
-            if (r) {
+            if (res.statusCode == 403) {
               uni.showToast({
                 icon: "error",
-                title: "刷新失败",
+                title: "没有查看权限",
                 duration: 2000 });
 
             } else {
-              uni.showToast({
-                icon: "error",
-                title: "加载失败",
-                duration: 2000 });
+              if (r) {
+                uni.showToast({
+                  icon: "error",
+                  title: "刷新失败",
+                  duration: 2000 });
 
+              } else {
+                uni.showToast({
+                  icon: "error",
+                  title: "加载失败",
+                  duration: 2000 });
+
+              }
             }
+
+
 
           }
         },
@@ -387,9 +429,16 @@ var _default =
         url: getApp().globalData.baseUrl + '/class',
         success: function success(res) {
           if (res.statusCode == 200) {
+            console.log("获取班级列表");
             _this2.classList = [];
             _this2.classList.push(res.data.data);
+            uni.setStorageSync("classList", _this2.classList);
+            _this2.classList[0].unshift({
+              "id": 0,
+              "name": "全部" });
+
             _this2.selectClass = _this2.classList[0][0];
+            console.log("获取班级列表 onRefresh");
             _this2.onRefresh();
           } else {
             uni.showToast({
@@ -415,7 +464,6 @@ var _default =
       uni.login({
         provider: 'weixin',
         success: function success(res) {
-          // console.log('登录成功：', res);
           //获取临时登录凭证code
           var code = res.code;
           uni.request({
@@ -428,11 +476,14 @@ var _default =
               console.log("code:" + code + "resultData:" + JSON.stringify(res));
               if (res.statusCode == 200) {
                 if (res.data.code == 200) {
-
                   var data = res.data.data;
+                  console.log("进入登录 data" + JSON.stringify(data));
                   _this3.userInfo = data;
-                  uni.setStorage("userInfo", data);
-                  _this3.fetchClassList();
+                  uni.setStorageSync("userInfo", data);
+                  if (_this3.userInfo.isBind) {
+                    console.log("getUserInfo fetchClassList");
+                    _this3.fetchClassList();
+                  }
                 } else {
                   uni.showToast({
                     icon: "error",
@@ -469,6 +520,69 @@ var _default =
             duration: 2000 });
 
         } });
+
+
+    },
+    decryptPhoneNumber: function decryptPhoneNumber(e) {
+      if (e.detail.errMsg == "getPhoneNumber:ok") {
+        //手机号授权成功
+        var code = e.detail.code;
+        this.bindPhone(code);
+
+      } else {
+        uni.showToast({
+          duration: 2000,
+          title: "手机号授权失败",
+          icon: "error" });
+
+      }
+    },
+    bindPhone: function bindPhone(code) {var _this4 = this;
+      console.log("bindPhone code" + code + "openId" + this.userInfo.openId);
+      uni.request({
+        method: "POST",
+        url: getApp().globalData.baseUrl + '/bind',
+        data: {
+          "code": code,
+          "openId": this.userInfo.openId },
+
+        success: function success(res) {
+          console.log("bindPhone" + JSON.stringify(res));
+          if (res.statusCode == 200) {
+            if (res.data.code == 200) {
+              _this4.userInfo.isBind = true;
+              _this4.userInfo.phone = res.data.msg;
+              uni.setStorageSync("userInfo", _this4.userInfo);
+              console.log("bindPhone fetchClassList");
+              _this4.fetchClassList();
+
+            } else {
+              uni.showToast({
+                icon: "error",
+                title: "手机号绑定失败",
+                duration: 2000 });
+
+            }
+
+
+          } else {
+            uni.showToast({
+              icon: "error",
+              title: "手机号绑定失败",
+              duration: 2000 });
+
+
+          }
+        },
+        fail: function fail(e) {
+          console.log(e);
+          uni.showToast({
+            icon: "error",
+            title: "手机号绑定失败",
+            duration: 2000 });
+
+        } });
+
 
     } } };exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))

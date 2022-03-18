@@ -1,7 +1,8 @@
 <script>
 	export default {
 		globalData: {
-			baseUrl: 'http://2qajh7.natappfree.cc'
+			// baseUrl: 'http://aacwp2.natappfree.cc'
+			baseUrl: 'https://www.pindtech.cn/shede'
 		},
 		onLaunch: function() {
 			console.warn('当前组件仅支持 uni_modules 目录结构 ，请升级 HBuilderX 到 3.1.0 版本以上！')

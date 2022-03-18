@@ -1,5 +1,5 @@
 {
-	"pages": [ {
+	"pages": [{
 			"path": "pages/customerList/customerList",
 			"style": {
 				"navigationBarTitleText": "客户名片管理",
@@ -24,14 +24,21 @@
 				"navigationBarTitleText": "",
 				"enablePullDownRefresh": false
 			}
-		}
+		},{
+            "path" : "pages/classManagement/classManagement",
+            "style": {
+            	"navigationBarTitleText": "班级列表"
+            }
+            
+        }
 
 
-	],
+	    
+    ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "uni-app",
-		"navigationBarBackgroundColor": "#F8F8F8",
+		"navigationBarBackgroundColor": "#FFFFFF",
 		"backgroundColor": "#F8F8F8",
 		"app-plus": {
 			"background": "#efeff4"

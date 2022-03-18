@@ -96,16 +96,19 @@ var components
 try {
   components = {
     uRow: function() {
-      return Promise.all(/*! import() | uni_modules/uview-ui/components/u-row/u-row */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u-row/u-row")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u-row/u-row.vue */ 185))
+      return Promise.all(/*! import() | uni_modules/uview-ui/components/u-row/u-row */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u-row/u-row")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u-row/u-row.vue */ 174))
     },
     "u-Image": function() {
-      return Promise.all(/*! import() | uni_modules/uview-ui/components/u--image/u--image */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u--image/u--image")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u--image/u--image.vue */ 193))
+      return Promise.all(/*! import() | uni_modules/uview-ui/components/u--image/u--image */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u--image/u--image")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u--image/u--image.vue */ 199))
+    },
+    uIcon: function() {
+      return Promise.all(/*! import() | uni_modules/uview-ui/components/u-icon/u-icon */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u-icon/u-icon")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u-icon/u-icon.vue */ 182))
     },
     "u-Text": function() {
-      return Promise.all(/*! import() | uni_modules/uview-ui/components/u--text/u--text */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u--text/u--text")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u--text/u--text.vue */ 216))
+      return Promise.all(/*! import() | uni_modules/uview-ui/components/u--text/u--text */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u--text/u--text")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u--text/u--text.vue */ 222))
     },
     uButton: function() {
-      return Promise.all(/*! import() | uni_modules/uview-ui/components/u-button/u-button */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u-button/u-button")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u-button/u-button.vue */ 199))
+      return Promise.all(/*! import() | uni_modules/uview-ui/components/u-button/u-button */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u-button/u-button")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u-button/u-button.vue */ 205))
     }
   }
 } catch (e) {
@@ -207,27 +210,71 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 var _default =
 {
   data: function data() {
     return {
       detail: {},
       baseUrl: "",
-      userInfo: {} };
+      userInfo: {},
+      scrollTop: 0,
+      old: {
+        scrollTop: 0 },
+
+      classList: [],
+      className: '' };
 
   },
-  onLoad: function onLoad(option) {var _this = this;
+  onLoad: function onLoad(option) {
     this.baseUrl = getApp().globalData.baseUrl;
-    uni.getStorage({
-      key: "userInfo",
-      success: function success(value) {
-        _this.userInfo = value;
-      } });
-
+    this.userInfo = uni.getStorageSync("userInfo");
+    this.classList = uni.getStorageSync("classList");
+    // uni.getStorage({
+    // 	key:"userInfo",
+    // 	success: (value) => {
+    // 		this.userInfo = value;
+    // 	}
+    // })
+    console.log("班级：" + JSON.stringify(this.classList[0]));
     this.detail = JSON.parse(decodeURIComponent(option.item));
+    var list = this.classList[0];
+    for (var i in list) {
+      var e = list[i];
+      if (e.id == this.detail.classId) {
+        this.className = e.name;
+        return;
+      }
+    }
 
   },
   methods: {
+    upper: function upper(e) {
+      console.log(e);
+    },
+    lower: function lower(e) {
+      console.log(e);
+    },
+    scroll: function scroll(e) {
+      console.log(e);
+      this.old.scrollTop = e.detail.scrollTop;
+    },
     jumpInputPage: function jumpInputPage() {
       if (!this.userInfo.admin) {
         uni.showToast({

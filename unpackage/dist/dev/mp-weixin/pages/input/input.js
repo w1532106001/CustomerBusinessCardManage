@@ -96,10 +96,16 @@ var components
 try {
   components = {
     uniFilePicker: function() {
-      return Promise.all(/*! import() | uni_modules/uni-file-picker/components/uni-file-picker/uni-file-picker */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uni-file-picker/components/uni-file-picker/uni-file-picker")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uni-file-picker/components/uni-file-picker/uni-file-picker.vue */ 222))
+      return Promise.all(/*! import() | uni_modules/uni-file-picker/components/uni-file-picker/uni-file-picker */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uni-file-picker/components/uni-file-picker/uni-file-picker")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uni-file-picker/components/uni-file-picker/uni-file-picker.vue */ 228))
+    },
+    uIcon: function() {
+      return Promise.all(/*! import() | uni_modules/uview-ui/components/u-icon/u-icon */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u-icon/u-icon")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u-icon/u-icon.vue */ 182))
+    },
+    uPicker: function() {
+      return Promise.all(/*! import() | uni_modules/uview-ui/components/u-picker/u-picker */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u-picker/u-picker")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u-picker/u-picker.vue */ 191))
     },
     uButton: function() {
-      return Promise.all(/*! import() | uni_modules/uview-ui/components/u-button/u-button */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u-button/u-button")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u-button/u-button.vue */ 199))
+      return Promise.all(/*! import() | uni_modules/uview-ui/components/u-button/u-button */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uview-ui/components/u-button/u-button")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uview-ui/components/u-button/u-button.vue */ 205))
     }
   }
 } catch (e) {
@@ -211,6 +217,79 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 var _default =
 {
   data: function data() {
@@ -221,30 +300,44 @@ var _default =
 
 
       imageValue: [],
+      companyImageValue: [],
       imageStyles: {
-        width: "400rpx",
-        height: "306rpx",
+        width: "160rpx",
+        height: "160rpx",
         border: {
           color: "#BBBBBB",
           width: "2rpx",
           radius: "0rpx" } },
 
 
+      listStyles: {
+        // 是否显示边框
+        border: true,
+        // 是否显示分隔线
+        dividline: true,
+        // 线条样式
+        borderStyle: {
+          width: 1,
+          color: 'blue',
+          radius: 2 } },
+
+
       selectImagePath: '',
+      companyPicturePath: '',
       imageData: "",
       //1new 2update
       type: 1,
       detail: {},
-      userInfo: {} };
+      userInfo: {},
+      classList: [],
+      showClassPicker: false,
+      className: "" };
 
   },
-  onLoad: function onLoad(option) {var _this = this;
-
-    uni.getStorage({
-      key: "userInfo",
-      success: function success(value) {
-        _this.userInfo = value;
-      } });
+  onLoad: function onLoad(option) {
+    console.log("进入input页面");
+    this.userInfo = uni.getStorageSync("userInfo");
+    this.classList = uni.getStorageSync("classList");
 
     if (option.detail) {
       var detail = JSON.parse(decodeURIComponent(option.detail));
@@ -255,7 +348,20 @@ var _default =
         extname: detail.extname,
         url: getApp().globalData.baseUrl + detail.picUrl }],
 
+      this.companyImageValue = [{
+        name: "file." + detail.extname,
+        extname: detail.extname,
+        url: getApp().globalData.baseUrl + detail.companyPicUrl }],
+
       console.log("参数：" + detail.extname);
+      var list = this.classList[0];
+      for (var i in list) {
+        var e = list[i];
+        if (e.id == this.detail.classId) {
+          this.className = e.name;
+          return;
+        }
+      }
     } else {
       this.type = 1;
     }
@@ -267,6 +373,11 @@ var _default =
       this.selectImagePath = e.tempFilePaths[0];
       console.log('选择文件：', e);
       console.log('选择文件路径：', this.selectImagePath);
+    },
+    selectCompanyPicture: function selectCompanyPicture(e) {
+      this.companyPicturePath = e.tempFilePaths[0];
+      console.log('选择文件：', e);
+      console.log('选择文件路径：', this.companyPicturePath);
     },
     // 获取上传进度
     progress: function progress(e) {
@@ -305,14 +416,22 @@ var _default =
         this.showEmptyToast("电话");
         return;
       }
+      // if (!uni.$u.test.mobile(this.detail.phone)) {
+      // 	uni.showToast({
+      // 		title: "手机号格式错误",
+      // 		icon: "error",
+      // 		duration: 2000
+      // 	})
+      // 	return
+      // }
       if (this.isEmpty(this.detail.address)) {
         this.showEmptyToast("地址");
         return;
       }
-      if (this.isEmpty(this.detail.className)) {
-        this.showEmptyToast("班级");
-        return;
-      }
+      // if (this.isEmpty(this.detail.className)) {
+      // 	this.showEmptyToast("班级")
+      // 	return
+      // }
       if (this.isEmpty(this.detail.companyName)) {
         this.showEmptyToast("企业名");
         return;
@@ -325,7 +444,15 @@ var _default =
         this.showEmptyToast("VR地址");
         return;
       }
-      if (this.selectImagePath) {
+      // if (!uni.$u.test.url(this.detail.vrUrl)) {
+      // 	uni.showToast({
+      // 		title: "VR地址格式错误",
+      // 		icon: "error",
+      // 		duration: 2000
+      // 	})
+      // 	return
+      // }
+      if (this.selectImagePath || this.companyPicturePath) {
         this.uploadFile();
       } else {
         uni.showLoading({
@@ -338,67 +465,164 @@ var _default =
         }
       }
     },
-    uploadFile: function uploadFile() {var _this2 = this;
+    uploadFile: function uploadFile() {var _this = this;
       console.log("图片数据" + this.selectImagePath);
+      console.log("图片数据" + this.companyPicturePath);
       uni.showLoading({
         mask: true });
 
-      uni.compressImage({
-        src: this.selectImagePath,
-        quality: 80,
-        success: function success(res) {
-          console.log(res.tempFilePath);
-          uni.uploadFile({
-            url: getApp().globalData.baseUrl + "/avatar",
-            filePath: res.tempFilePath,
-            name: "file",
-            header: {
-              "Authorization": _this2.userInfo.openId },
+      var compressImagePromises = [];
+      if (this.selectImagePath) {
+        compressImagePromises.push(this.compressImage(this.selectImagePath));
+      }
+      if (this.companyPicturePath) {
+        compressImagePromises.push(this.compressImage(this.companyPicturePath));
+      }
 
-            success: function success(res) {
-              console.log(res);
-              if (res.statusCode == 200) {
-                var picUrl = JSON.parse(res.data).data;
-                _this2.detail.picUrl = picUrl;
-                console.log("图片上传成功url:" + picUrl);
-                if (_this2.type == 1) {
-                  _this2.newInfo();
-                } else {
-                  _this2.updateInfo();
-                }
-              } else {
-                uni.hideLoading();
-                uni.showToast({
-                  title: res.errMsg,
-                  duration: 2000 });
+      Promise.all(compressImagePromises).then(function (values) {
+        var uploadImagePromises = [];
+        console.log("图片压缩完成");
+        if (_this.selectImagePath && _this.companyPicturePath) {
+          uploadImagePromises.push(_this.uploadImage(values[0]));
+          uploadImagePromises.push(_this.uploadCompanyImage(values[1]));
+          console.log("上传用户与企业图片");
 
-              }
-            },
-            fail: function fail(e) {
-              console.log(e);
+        } else if (_this.companyPicturePath) {
+          console.log("上传企业图片");
+          uploadImagePromises.push(_this.uploadCompanyImage(values[0]));
+        } else {
+          console.log("上传用户图片");
+          uploadImagePromises.push(_this.uploadImage(values[0]));
+
+        }
+        Promise.all(uploadImagePromises).then(function (values) {
+          console.log("图片完成");
+          console.log(values);
+          if (_this.type == 1) {
+            _this.newInfo();
+          } else {
+            _this.updateInfo();
+          }
+        }).catch(function (err) {
+          console.log(err);
+
+        });
+      }).catch(function (err) {
+        console.log(err);
+
+      });
+    },
+    compressImage: function compressImage(url) {
+      console.log("图片压缩" + url);
+      return new Promise(function (resolve, reject) {
+        uni.compressImage({
+          src: url,
+          quality: 80,
+          success: function success(res) {
+            console.log("图片压缩成功" + res.tempFilePath);
+            resolve(res.tempFilePath);
+
+          },
+          fail: function fail(e) {
+            console.log('图片压缩失败e:' + e);
+            uni.hideLoading();
+            uni.showToast({
+              duration: 2000,
+              title: "图片压缩失败",
+              icon: "error" });
+
+            reject(e);
+          } });
+
+      });
+    },
+    uploadImage: function uploadImage(url) {var _this2 = this;
+      return new Promise(function (resolve, reject) {
+        uni.uploadFile({
+          url: getApp().globalData.baseUrl + "/upload",
+          filePath: url,
+          name: "file",
+          header: {
+            "Authorization": _this2.userInfo.openId },
+
+          success: function success(res) {
+            console.log(res);
+            if (res.statusCode == 200) {
+              var picUrl = JSON.parse(res.data).data;
+              _this2.detail.picUrl = picUrl;
+              console.log("图片上传成功url:" + picUrl);
+              resolve(picUrl);
+
+            } else {
               uni.hideLoading();
               uni.showToast({
-                icon: "error",
-                title: "图片上传失败",
+                title: res.errMsg,
                 duration: 2000 });
 
-            } });
+              reject(res.errMsg);
+            }
+          },
+          fail: function fail(e) {
+            uni.hideLoading();
+            uni.showToast({
+              icon: "error",
+              title: "图片上传失败",
+              duration: 2000 });
+
+            reject(e);
+          } });
 
 
 
-        },
-        fail: function fail(e) {
-          console.log('图片压缩失败e:' + e);
-          uni.hideLoading();
-          uni.showToast({
-            duration: 2000,
-            title: "图片压缩失败",
-            icon: "error" });
-
-        } });
-
+      });
 
     },
+    uploadCompanyImage: function uploadCompanyImage(url) {var _this3 = this;
+      return new Promise(function (resolve, reject) {
+        uni.uploadFile({
+          url: getApp().globalData.baseUrl + "/upload",
+          filePath: url,
+          name: "file",
+          header: {
+            "Authorization": _this3.userInfo.openId },
+
+          success: function success(res) {
+            console.log(res);
+            if (res.statusCode == 200) {
+              var picUrl = JSON.parse(res.data).data;
+              _this3.detail.companyPicUrl = picUrl;
+              console.log("图片上传成功url:" + picUrl);
+              resolve(picUrl);
+              // if (this.type == 1) {
+              // 	this.newInfo()
+              // } else {
+              // 	this.updateInfo()
+              // }
+            } else {
+              uni.hideLoading();
+              uni.showToast({
+                title: res.errMsg,
+                duration: 2000 });
+
+              reject(res.errMsg);
+            }
+          },
+          fail: function fail(e) {
+            uni.hideLoading();
+            uni.showToast({
+              icon: "error",
+              title: "图片上传失败",
+              duration: 2000 });
+
+            reject(e);
+          } });
+
+
+
+      });
+
+    },
+
     updateInfo: function updateInfo() {
       var detail = this.detail;
       detail.phone = parseInt(detail.phone);
@@ -444,6 +668,7 @@ var _default =
       var detail = this.detail;
       detail.phone = parseInt(detail.phone);
       console.log("detail" + JSON.stringify(this.detail));
+      console.log("userInfo" + JSON.stringify(this.userInfo));
       uni.request({
         method: "POST",
         url: getApp().globalData.baseUrl + '/info', //仅为示例，并非真实接口地址。
@@ -464,7 +689,7 @@ var _default =
             uni.navigateBack();
           } else {
             uni.showToast({
-              title: res.errMsg,
+              title: "提交失败",
               duration: 2000 });
 
           }
@@ -490,6 +715,20 @@ var _default =
     isEmpty: function isEmpty(str) {
       return !str || 0 === str.length;
 
+    },
+    onPickerCancel: function onPickerCancel() {
+      this.showClassPicker = false;
+
+    },
+    onPickerConfirm: function onPickerConfirm(item) {
+      this.showClassPicker = false;
+      var value = item.values[0][item.indexs[0]];
+      this.detail.classId = value.id;
+      this.className = value.name;
+
+    },
+    showClassPickerFun: function showClassPickerFun() {
+      this.showClassPicker = true;
     } } };exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 

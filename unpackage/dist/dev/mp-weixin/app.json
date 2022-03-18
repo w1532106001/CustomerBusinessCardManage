@@ -3,15 +3,15 @@
     "pages/customerList/customerList",
     "pages/index/index",
     "pages/detail/detail",
-    "pages/input/input"
+    "pages/input/input",
+    "pages/classManagement/classManagement"
   ],
   "subPackages": [],
   "window": {
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "uni-app",
-    "navigationBarBackgroundColor": "#F8F8F8",
+    "navigationBarBackgroundColor": "#FFFFFF",
     "backgroundColor": "#F8F8F8"
   },
-  "usingComponents": {},
-  "sitemapLocation": "sitemap.json"
+  "usingComponents": {}
 }
