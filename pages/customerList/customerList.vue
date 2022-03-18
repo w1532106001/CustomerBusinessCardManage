@@ -18,27 +18,33 @@
 		<scroll-view style="flex: 1;overflow: hidden;" scroll-y refresher-enabled="true" @scrolltoupper="upper"
 			@scrolltolower="lower" @scroll="scroll" :refresher-triggered="triggered" :lower-threshold="100"
 			@refresherrefresh="onRefresh">
-			<view v-for="(item, index) in dataList" :key="index">
-				<view style="padding-left: 30rpx;padding-right: 30rpx; margin-top: 68rpx;color: #333333;" @click="clickItem(item)">
-					<u-row customStyle="border-bottom:1rpx solid #E5E5E5;padding-bottom: 25rpx;position: relative;">
-						<view>
-							<u--image shape="circle" :showLoading="true" :src="baseUrl+item.picUrl" width="90rpx" height="90rpx">
-							</u--image>
-						</view>
-						<view style="margin-left: 18rpx;">
-							<u-row>
-								<view style="font-size: 32rpx;color: #333333;font-weight: bold;">{{item.name}}</view>
-								<view style="margin-left: 18rpx;font-size: 27rpx;color: #999999;">手机: {{item.phone}}</view>
+			<view v-for="(item, index) in dataList" :key="item.id">
+				<u-swipe-action>
+					<u-swipe-action-item :options="options1" autoClose :key="item.id" @click="deleteMember(index,item.id)">
+						<view style="padding-left: 30rpx;padding-right: 30rpx; margin-top: 68rpx;color: #333333;" @click="clickItem(item)">
+							<u-row customStyle="border-bottom:1rpx solid #E5E5E5;padding-bottom: 25rpx;position: relative;">
+								<view>
+									<u--image shape="circle" :showLoading="true" :src="baseUrl+item.picUrl" width="90rpx" height="90rpx">
+									</u--image>
+								</view>
+								<view style="margin-left: 18rpx;">
+									<u-row>
+										<view style="font-size: 32rpx;color: #333333;font-weight: bold;">{{item.name}}</view>
+										<view style="margin-left: 18rpx;font-size: 27rpx;color: #999999;">手机: {{item.phone}}</view>
+									</u-row>
+									<u-row customStyle="margin-top:17rpx;">
+										<view>{{item.companyName}}</view>
+										<view style="margin-left: 33rpx;">{{item.employeeName}}</view>
+									</u-row>
+								</view>
+								<view style="position:absolute;right:0px;bottom: 0px;margin-bottom: 25rpx;"><u-icon color="#5479F3" size="22" name="phone"></u-icon></view>
 							</u-row>
-							<u-row customStyle="margin-top:17rpx;">
-								<view>{{item.companyName}}</view>
-								<view style="margin-left: 33rpx;">{{item.employeeName}}</view>
-							</u-row>
+							
 						</view>
-						<view style="position:absolute;right:0px;bottom: 0px;margin-bottom: 25rpx;"><u-icon color="#5479F3" size="22" name="phone"></u-icon></view>
-					</u-row>
-					
-				</view>
+						
+					</u-swipe-action-item>
+				</u-swipe-action>
+				
 				
 				
 			</view>
@@ -84,6 +90,12 @@
 				baseUrl: "",
 				selectClass: {},
 				userInfo: {},
+				options1: [{
+					text: '删除',
+					style: {
+						backgroundColor: '#F33636'
+					}
+				}],
 				// bindPhone:false,
 
 			}
@@ -413,6 +425,22 @@
 				});
 
 			}
+		,	deleteMember(index,id) {
+				this.dataList.splice(index,1);
+				uni.request({
+					method: "DELETE",
+					url: getApp().globalData.baseUrl + '/info/'+id,
+					header: {
+						"Authorization": this.userInfo.openId
+					},
+					success: (res) => {
+						console.log(res)					
+					},
+					fail: (e) => {
+						console.log(e)}
+				});
+				
+			},
 		}
 	}
 </script>

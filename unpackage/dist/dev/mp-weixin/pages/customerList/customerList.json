@@ -5,6 +5,8 @@
     "u-row": "/uni_modules/uview-ui/components/u-row/u-row",
     "u-icon": "/uni_modules/uview-ui/components/u-icon/u-icon",
     "u-picker": "/uni_modules/uview-ui/components/u-picker/u-picker",
+    "u-swipe-action": "/uni_modules/uview-ui/components/u-swipe-action/u-swipe-action",
+    "u-swipe-action-item": "/uni_modules/uview-ui/components/u-swipe-action-item/u-swipe-action-item",
     "u--image": "/uni_modules/uview-ui/components/u--image/u--image",
     "u-button": "/uni_modules/uview-ui/components/u-button/u-button"
   }
